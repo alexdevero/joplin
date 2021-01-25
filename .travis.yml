@@ -9,6 +9,7 @@ rvm: 2.3.3
 branches:
   only:
     - master
+    - dev
     - /^v\d+\.\d+(\.\d+)?(-\S*)?$/
 
 matrix:
@@ -16,7 +17,7 @@ matrix:
     - os: osx
       osx_image: xcode9.0
       language: node_js
-      node_js: "8"
+      node_js: "10"
       env:
         - ELECTRON_CACHE=$HOME/.cache/electron
         - ELECTRON_BUILDER_CACHE=$HOME/.cache/electron-builder
@@ -25,7 +26,7 @@ matrix:
       sudo: required
       dist: trusty
       language: node_js
-      node_js: "8"
+      node_js: "10"
       env:
         - ELECTRON_CACHE=$HOME/.cache/electron
         - ELECTRON_BUILDER_CACHE=$HOME/.cache/electron-builder
@@ -42,6 +43,8 @@ before_install:
 
   # Silence apt-get update errors (for example when a module doesn't exist) since
   # otherwise it will make the whole build fails, even though all we need is yarn.
+
+  # libsecret-1-dev is required for keytar - https://github.com/atom/node-keytar
   - |
     if [ "$TRAVIS_OS_NAME" == "osx" ]; then
       HOMEBREW_NO_AUTO_UPDATE=1 brew install yarn
@@ -51,16 +54,13 @@ before_install:
       sudo apt-get update || true
       sudo apt-get install -y yarn
       sudo apt-get install -y gettext
+      sudo apt-get install -y libsecret-1-dev
     fi
 
 script:
   - |
-    # Copy lib
-    rsync -aP --delete ReactNativeClient/lib/ ElectronClient/app/lib/
-
     # Install tools
     npm install
-    npm run tsc
     cd Tools
     npm install
     cd ..
@@ -70,8 +70,7 @@ script:
     # and that would break the desktop release.
     if [ "$TRAVIS_PULL_REQUEST" != "false" ]; then
       cd CliClient
-      npm install
-      ./run_test.sh
+      npm run test-ci
       testResult=$?
       if [ $testResult -ne 0 ]; then
         exit $testResult
@@ -113,5 +112,5 @@ script:
     fi
 
     # Prepare the Electron app and build it
-    cd ElectronClient/app
-    npm install && USE_HARD_LINKS=false yarn dist
+    cd ElectronClient
+    USE_HARD_LINKS=false npm run dist

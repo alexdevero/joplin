@@ -9,6 +9,7 @@ const spawn = require('child_process').spawn;
 const chokidar = require('chokidar');
 const { bridge } = require('electron').remote.require('./bridge');
 const { time } = require('lib/time-utils.js');
+const { ErrorNotFound } = require('./rest/errors');
 
 class ExternalEditWatcher {
 	constructor() {
@@ -24,6 +25,28 @@ class ExternalEditWatcher {
 		if (this.instance_) return this.instance_;
 		this.instance_ = new ExternalEditWatcher();
 		return this.instance_;
+	}
+
+	externalApi() {
+		const loadNote = async (noteId) => {
+			const note = await Note.load(noteId);
+			if (!note) throw new ErrorNotFound(`No such note: ${noteId}`);
+			return note;
+		};
+
+		return {
+			openAndWatch: async ({ noteId }) => {
+				const note = await loadNote(noteId);
+				return this.openAndWatch(note);
+			},
+			stopWatching: async ({ noteId }) => {
+				return this.stopWatching(noteId);
+			},
+			noteIsWatched: async ({ noteId }) => {
+				const note = await loadNote(noteId);
+				return this.noteIsWatched(note);
+			},
+		};
 	}
 
 	tempDir() {
@@ -107,7 +130,7 @@ class ExternalEditWatcher {
 						updatedNote.id = id;
 						updatedNote.parent_id = note.parent_id;
 						await Note.save(updatedNote);
-						this.eventEmitter_.emit('noteChange', { id: updatedNote.id });
+						this.eventEmitter_.emit('noteChange', { id: updatedNote.id, note: updatedNote });
 					}
 
 					this.skipNextChangeEvent_ = {};
@@ -150,7 +173,7 @@ class ExternalEditWatcher {
 		const output = [];
 		const watchedPaths = this.watcher_.getWatched();
 
-		for (let dirName in watchedPaths) {
+		for (const dirName in watchedPaths) {
 			if (!watchedPaths.hasOwnProperty(dirName)) continue;
 
 			for (let i = 0; i < watchedPaths[dirName].length; i++) {
@@ -169,7 +192,7 @@ class ExternalEditWatcher {
 
 		const watchedPaths = this.watcher_.getWatched();
 
-		for (let dirName in watchedPaths) {
+		for (const dirName in watchedPaths) {
 			if (!watchedPaths.hasOwnProperty(dirName)) continue;
 
 			for (let i = 0; i < watchedPaths[dirName].length; i++) {
@@ -216,7 +239,7 @@ class ExternalEditWatcher {
 
 			const wrapError = error => {
 				if (!error) return error;
-				let msg = error.message ? [error.message] : [];
+				const msg = error.message ? [error.message] : [];
 				msg.push(`Command was: "${path}" ${args.join(' ')}`);
 				error.message = msg.join('\n\n');
 				return error;

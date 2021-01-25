@@ -1,6 +1,5 @@
 # Joplin API
 
-When the Web Clipper service is enabled, Joplin exposes a [REST API](https://en.wikipedia.org/wiki/Representational_state_transfer) which allows third-party applications to access Joplin's data and to create, modify or delete notes, notebooks, resources or tags.
 
 In order to use it, you'll first need to find on which port the service is running. To do so, open the Web Clipper Options in Joplin and if the service is running it should tell you on which port. Normally it runs on port **41184**. If you want to find it programmatically, you may follow this kind of algorithm:
 
@@ -72,6 +71,34 @@ Call **GET /ping** to check if the service is available. It should return "Jopli
 
 Call **GET /search?query=YOUR_QUERY** to search for notes. This end-point supports the `field` parameter which is recommended to use so that you only get the data that you need. The query syntax is as described in the main documentation: https://joplinapp.org/#searching
 
+To retrieve non-notes items, such as notebooks or tags, add a `type` parameter and set it to the required [item type name](#item-type-id). In that case, full text search will not be used - instead it will be a simple case-insensitive search. You can also use `*` as a wildcard. This is convenient for example to retrieve notebooks or tags by title.
+
+For example, to retrieve the notebook named `recipes`: **GET /search?query=recipes&type=folder**
+
+To retrieve all the tags that start with `project-`: **GET /search?query=project-*&type=tag**
+
+# Item type IDs
+
+Item type IDs might be refered to in certain object you will retrieve from the API. This is the correspondance between name and ID:
+
+Name | Value
+---- | -----
+note | 1   
+folder | 2   
+setting | 3   
+resource | 4   
+tag | 5   
+note_tag | 6   
+search | 7   
+alarm | 8   
+master_key | 9   
+item_change | 10   
+note_resource | 11   
+resource_local_state | 12   
+revision | 13   
+migration | 14   
+smart_filter | 15   
+
 # Notes
 
 ## Properties
@@ -96,7 +123,7 @@ todo_completed | int | Tells whether todo is completed or not. This is a timesta
 source | text |    
 source_application | text |    
 application_data | text |    
-order | int |    
+order | numeric |    
 user_created_time | int | When the note was created. It may differ from created_time as it can be manually set by the user.
 user_updated_time | int | When the note was last updated. It may differ from updated_time as it can be manually set by the user.
 encryption_cipher_text | text |    
@@ -146,7 +173,7 @@ Examples:
 
 ### Creating a note with a specific ID
 
-When a new note is created, it is automatically assigned a new unique ID so **normally you do not need to set the ID**. However, if for some reason you want to set it, you can supply it as the `id` property. It needs to be a 32 characters long hexadecimal string. **Make sure it is unique**, for example by generating it using whatever GUID function is available in your programming language.
+When a new note is created, it is automatically assigned a new unique ID so **normally you do not need to set the ID**. However, if for some reason you want to set it, you can supply it as the `id` property. It needs to be a **32 characters long string** in hexadecimal. **Make sure it is unique**, for example by generating it using whatever GUID function is available in your programming language.
 
       curl --data '{ "id": "00a87474082744c1a8515da6aa5792d2", "title": "My note with custom ID"}' http://127.0.0.1:41184/notes
 
@@ -269,6 +296,7 @@ user_updated_time | int | When the tag was last updated. It may differ from upda
 encryption_cipher_text | text |    
 encryption_applied | int |    
 is_shared | int |    
+parent_id | text |    
 
 ## GET /tags
 
@@ -301,4 +329,3 @@ Deletes the tag with ID :id
 ## DELETE /tags/:id/notes/:note_id
 
 Remove the tag from the note.
-

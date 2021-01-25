@@ -24,7 +24,7 @@ Platforms: Desktop and/or mobile (at the student's choice)
 
 Skills Required: JavaScript; React; React Native (for mobile)
 
-Potential Mentor(s):
+Potential Mentor(s): [tessus](https://github.com/tessus), [laurent22](https://github.com/laurent22/)
 
 More info: [GitHub issue](https://github.com/laurent22/joplin/issues/591), [Forum Thread](https://discourse.joplinapp.org/t/can-i-run-a-second-instance-of-joplin/110)
 
@@ -44,9 +44,9 @@ Platforms: Desktop and/or mobile (at the student's choice)
 
 Skills Required: JavaScript; React; React Native (for mobile)
 
-Potential Mentor(s):
+Potential Mentor(s): [Roeland Jago Douma](mailto:roeland.douma@nextcloud.com), [laurent22](https://github.com/laurent22/)
 
-More info: [Forum thread about Joplin Web API for Nextcloud](https://discourse.joplinapp.org/t/joplin-api-in-nextcloud-prototype/)
+More info: [Forum thread about Joplin Web API for Nextcloud](https://discourse.joplinapp.org/t/joplin-web-api-for-nextcloud/4491)
 
 ## 3. Hierarchical Tags
 
@@ -60,7 +60,7 @@ Platforms: Desktop, Mobile and Terminal
 
 Skills Required: JavaScript; React; React Native (for mobile)
 
-Potential Mentor(s):
+Potential Mentor(s): [laurent22](https://github.com/laurent22/)
 
 More info: [GitHub issue](https://github.com/laurent22/joplin/issues/375)
 
@@ -76,7 +76,7 @@ Platforms: Mobile (iOS and Android)
 
 Skills Required: JavaScript; React; React Native
 
-Potential Mentor(s):
+Potential Mentor(s): [CalebJohn](https://github.com/CalebJohn/), [laurent22](https://github.com/laurent22/)
 
 More info: [Mobile - Add share menu #876](https://github.com/laurent22/joplin/issues/876)
 
@@ -97,11 +97,11 @@ Difficulty Level: High
 
 Skills Required: PHP (for the Nextcloud app). For the front-end it can be plain HTML (no JS), or React.
 
-Potential Mentor(s):
+Potential Mentor(s): [Roeland Jago Douma](mailto:roeland.douma@nextcloud.com), [laurent22](https://github.com/laurent22/)
 
 More info: [GitHub: Nextcloud notes integration (Web client)](https://github.com/laurent22/joplin/issues/228)
 
-## 5. OCR support
+## 6. OCR support
 
 It is possible to add support for OCR content in Joplin via the [Tesseract library](http://tesseract.projectnaptha.com/). A first step would be to assess the feasibility of this project by integrating the lib in the desktop app and trying to OCR an image. OCR support should be implemented as a service of the desktop app. It would extract the text from the images, and append the content as plain text to the notes.
 
@@ -111,9 +111,9 @@ Difficulty Level: High
 
 Skills Required: JavaScript
 
-Potential Mentor(s):
+Potential Mentor(s): [CalebJohn](https://github.com/CalebJohn/), [laurent22](https://github.com/laurent22/)
 
-## 6. Password-protected notes
+## 7. Password-protected notes
 
 We would like to add an option to allow encrypting a note or a notebook with a password. When opening the note, the password must be provided to reveal the content.
 
@@ -123,13 +123,15 @@ Difficulty Level: Medium
 
 Skills Required: JavaScript; React
 
-Potential Mentor(s):
+Potential Mentor(s): [PackElend](https://github.com/PackElend), [laurent22](https://github.com/laurent22/)
 
-## 7. Search
+## 8. Search
 
 The current search engine is built on top of SQLite FTS. An index of the notes is built and this is what is used by FTS when searching.
 
 While it works relatively well, there is still room for improvement. In particular we would like to implement the following:
+
+- Allow boolean searches - search for "A and B", or "A or B", etc.
 
 - Remove the need for wildcard queries - for example instead of typing "search*", it will be possible to simply type "search" and results that contain "search" or "searching" will be included. Those that contain the exact match will come first.
 
@@ -145,11 +147,11 @@ Difficulty Level: Medium
 
 Skills Required: JavaScript
 
-Potential Mentor(s):
+Potential Mentor(s): [laurent22](https://github.com/laurent22/)
 
 More info: [Search engine improvements](https://github.com/laurent22/joplin/issues/1877)
 
-## 8. WYSIWYG Editor
+## 9. WYSIWYG Editor
 
 The current editor shows the Markdown text on the left side and the rendered HTML on the right side (a split view). We would like to add another editor option, which would be a WYSIWYG editor, where the user can directly edit formatted text. This would not replace the split view but rather be an alternative editor and the user can choose either split view or WYSIWYG.
 
@@ -159,6 +161,18 @@ Difficulty Level: High
 
 Skills Required: JavaScript; React
 
-Potential Mentor(s):
+Potential Mentor(s): [CalebJohn](https://github.com/CalebJohn/), [PackElend](https://github.com/PackElend), [laurent22](https://github.com/laurent22/)
 
 More info: [WYSIWYG thread on the forum](https://discourse.joplinapp.org/t/wysiwyg-editor-in-joplin/2253)
+
+## 10. Custom keyboard shortcuts
+
+The CLI application allows setting custom keyboard shortcuts, however this feature is currently missing from the desktop application. We would like to let the user set shortcuts for the menu items in particular, but also potentially any other Joplin action. There should be a shortcut editor in the Config panel to do this.
+
+Expected Outcome: To add support for custom shortcuts and allow editing them in the config screen
+
+Difficulty Level: Easy
+
+Skills Required: JavaScript; React
+
+Potential Mentor(s): [tessus](https://github.com/tessus), [laurent22](https://github.com/laurent22/)

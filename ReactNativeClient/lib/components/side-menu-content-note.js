@@ -3,7 +3,9 @@ const Component = React.Component;
 const { TouchableOpacity, Text, StyleSheet, ScrollView, View } = require('react-native');
 const { connect } = require('react-redux');
 const Icon = require('react-native-vector-icons/Ionicons').default;
-const { globalStyle, themeStyle } = require('lib/components/global-style.js');
+const { themeStyle } = require('lib/components/global-style.js');
+
+Icon.loadFont();
 
 class SideMenuContentNoteComponent extends Component {
 	constructor() {
@@ -18,7 +20,7 @@ class SideMenuContentNoteComponent extends Component {
 		if (this.styles_[this.props.theme]) return this.styles_[this.props.theme];
 		this.styles_ = {};
 
-		let styles = {
+		const styles = {
 			menu: {
 				flex: 1,
 				backgroundColor: theme.backgroundColor,
@@ -48,7 +50,8 @@ class SideMenuContentNoteComponent extends Component {
 	}
 
 	renderDivider(key) {
-		return <View style={{ marginTop: 15, marginBottom: 15, flex: -1, borderBottomWidth: 1, borderBottomColor: globalStyle.dividerColor }} key={key}></View>;
+		const theme = themeStyle(this.props.theme);
+		return <View style={{ marginTop: 15, marginBottom: 15, flex: -1, borderBottomWidth: 1, borderBottomColor: theme.dividerColor }} key={key}></View>;
 	}
 
 	renderSideBarButton(key, title, iconName, onPressHandler) {
@@ -71,7 +74,7 @@ class SideMenuContentNoteComponent extends Component {
 	render() {
 		const theme = themeStyle(this.props.theme);
 
-		let items = [];
+		const items = [];
 
 		const options = this.props.options ? this.props.options : [];
 		let dividerIndex = 0;
@@ -84,10 +87,10 @@ class SideMenuContentNoteComponent extends Component {
 			}
 		}
 
-		let style = {
+		const style = {
 			flex: 1,
 			borderRightWidth: 1,
-			borderRightColor: globalStyle.dividerColor,
+			borderRightColor: theme.dividerColor,
 			backgroundColor: theme.backgroundColor,
 			paddingTop: 10,
 		};

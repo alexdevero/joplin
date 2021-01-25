@@ -55,6 +55,7 @@ class InteropService {
 				description: _('Evernote Export File (as HTML)'),
 				// TODO: Consider doing this the same way as the multiple `md` importers are handled
 				importerClass: 'InteropService_Importer_EnexToHtml',
+				outputFormat: 'html',
 			},
 		];
 
@@ -97,14 +98,11 @@ class InteropService {
 
 		importModules = importModules.map(a => {
 			const className = a.importerClass || `InteropService_Importer_${toTitleCase(a.format)}`;
-			const output = Object.assign(
-				{},
-				{
-					type: 'importer',
-					path: `lib/services/${className}`,
-				},
-				a
-			);
+			const output = Object.assign({}, {
+				type: 'importer',
+				path: `lib/services/${className}`,
+				outputFormat: 'md',
+			}, a);
 			if (!('isNoteArchive' in output)) output.isNoteArchive = true;
 			return output;
 		});
@@ -142,15 +140,17 @@ class InteropService {
 	// or exporters, such as ENEX. In this case, the one marked as "isDefault"
 	// is returned. This is useful to auto-detect the module based on the format.
 	// For more precise matching, newModuleFromPath_ should be used.
-	findModuleByFormat_(type, format, target = null) {
+	findModuleByFormat_(type, format, target = null, outputFormat = null) {
 		const modules = this.modules();
 		const matches = [];
 		for (let i = 0; i < modules.length; i++) {
 			const m = modules[i];
 			if (m.format === format && m.type === type) {
-				if (target === null) {
+				if (!target && !outputFormat) {
 					matches.push(m);
-				} else if (target === m.target) {
+				} else if (target && target === m.target) {
+					matches.push(m);
+				} else if (outputFormat && outputFormat === m.outputFormat) {
 					matches.push(m);
 				}
 			}
@@ -169,9 +169,9 @@ class InteropService {
 	 * https://github.com/laurent22/joplin/pull/1795#discussion_r322379121) but
 	 * we can do it if it ever becomes necessary.
 	 */
-	newModuleByFormat_(type, format) {
-		const moduleMetadata = this.findModuleByFormat_(type, format);
-		if (!moduleMetadata) throw new Error(_('Cannot load "%s" module for format "%s"', type, format));
+	newModuleByFormat_(type, format, outputFormat = 'md') {
+		const moduleMetadata = this.findModuleByFormat_(type, format, null, outputFormat);
+		if (!moduleMetadata) throw new Error(_('Cannot load "%s" module for format "%s" and output "%s"', type, format, outputFormat));
 		const ModuleClass = require(moduleMetadata.path);
 		const output = new ModuleClass();
 		output.setMetadata(moduleMetadata);
@@ -196,7 +196,7 @@ class InteropService {
 		const ModuleClass = require(modulePath);
 		const output = new ModuleClass();
 		const moduleMetadata = this.findModuleByFormat_(type, options.format, options.target);
-		output.setMetadata({options, ...moduleMetadata}); // TODO: Check that this metadata is equivalent to module above
+		output.setMetadata({ options, ...moduleMetadata }); // TODO: Check that this metadata is equivalent to module above
 		return output;
 	}
 
@@ -243,15 +243,12 @@ class InteropService {
 
 		let result = { warnings: [] };
 
-		// console.log('options passed to InteropService:');
-		// console.log(JSON.stringify({options}, null, 2));
-
 		let importer = null;
 
 		if (options.modulePath) {
 			importer = this.newModuleFromPath_('importer', options);
 		} else {
-			importer = this.newModuleByFormat_('importer', options.format);
+			importer = this.newModuleByFormat_('importer', options.format, options.outputFormat);
 		}
 
 		await importer.init(options.path, options);
@@ -277,7 +274,7 @@ class InteropService {
 			});
 		};
 
-		let exportedNoteIds = [];
+		const exportedNoteIds = [];
 		let resourceIds = [];
 		const folderIds = await Folder.allIds();
 
@@ -317,7 +314,7 @@ class InteropService {
 
 		const noteTags = await NoteTag.all();
 
-		let exportedTagIds = [];
+		const exportedTagIds = [];
 
 		for (let i = 0; i < noteTags.length; i++) {
 			const noteTag = noteTags[i];
@@ -331,7 +328,7 @@ class InteropService {
 		}
 
 		const exporter = this.newModuleFromPath_('exporter', options);// this.newModuleByFormat_('exporter', exportFormat);
-		await exporter.init(exportPath);
+		await exporter.init(exportPath, options);
 
 		const typeOrder = [BaseModel.TYPE_FOLDER, BaseModel.TYPE_RESOURCE, BaseModel.TYPE_NOTE, BaseModel.TYPE_TAG, BaseModel.TYPE_NOTE_TAG];
 		const context = {
@@ -340,6 +337,8 @@ class InteropService {
 
 		for (let typeOrderIndex = 0; typeOrderIndex < typeOrder.length; typeOrderIndex++) {
 			const type = typeOrder[typeOrderIndex];
+
+			await exporter.prepareForProcessingItemType(type, itemsToExport);
 
 			for (let i = 0; i < itemsToExport.length; i++) {
 				const itemType = itemsToExport[i].type;

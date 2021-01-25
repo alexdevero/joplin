@@ -9,18 +9,13 @@ platform:
   # - '%USERPROFILE%\.electron'
 
 install:
-  - ps: Install-Product node 8 x64
+  - ps: Install-Product node 10 x64
   - yarn
 
 build_script:
-  - ps: xcopy /C /I /H /R /Y /S ReactNativeClient\lib ElectronClient\app\lib
   - npm install
-  - npm run tsc
-  - ps: cd Tools
-  - npm install
-  - ps: cd ..\ElectronClient\app
-  - npm install
-  - yarn dist
+  - ps: cd ElectronClient
+  - npm run dist
 
 test: off
 
